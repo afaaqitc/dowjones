@@ -48,22 +48,10 @@ dwfor<-forecast(dwets,h = 12)
 
 months_last_chart<-
 cbind(
-dwm[c(382:393),] ,
-rownames_to_column(as.data.frame(dwfor))
-) %>% select(c(1,2,6)) %>% rename(date=mn) %>% clean_names() %>% 
-mutate(date=as.POSIXct(date)) %>% 
-pivot_longer(!date,names_to ="Prices" ,values_to = "values") %>% 
-ggplot(aes(x=date,y=values,fill=Prices))+
-geom_bar(stat = "identity",position = "stack")+theme_linedraw()+
-theme_linedraw()+labs(x="",y="",caption = "DowJones Last Year Detect Model.")+
-theme(axis.text.x = element_text(face = "bold",colour = "black"),
-axis.text.y = element_blank(),axis.ticks.y = element_blank(),
-plot.caption = element_text(face = "bold",colour = "darkgray"))+
-geom_text(aes(label = paste0(round(values/1000,2),"K")),
-position = position_stack(vjust = 0.5),colour = "white",fontface = "bold")+
-scale_fill_brewer(palette = "Dark2")+
-scale_x_datetime(date_breaks ="month" ,date_labels = "%b-%Y")
-
+    dwm[c(382:393),] ,
+    rownames_to_column(as.data.frame(dwfor))
+) %>% select(c(1,2,6)) %>% rename(date=mn) %>% clean_names() %>% mutate(date=as.POSIXct(date)) %>% pivot_longer(!date,names_to = "levels",values_to = "prices") %>% ggplot(aes(x=date,y=prices,group=levels,color=levels))+geom_line(size=1.3)+geom_point(size=3)+scale_color_brewer(palette = "Set1")+geom_label(aes(label=round(prices/1000,2)),size=3,nudge_x =.25 ,nudge_y = .25,size = 1)+labs(x="",y="",title = "Detect Last Year DowJones Prices Model",subtitle = "Data Focus Period: 1992 - Sep 2023")+scale_y_continuous(labels = comma)+theme_bw()+theme(axis.text.x = element_text(face = "bold",color="black"),axis.text.y = element_text(face = "bold",color="black"),legend.position = "top",plot.title = element_text(color = "#2c3e50",face = "bold"))+scale_x_datetime(date_breaks ="month" ,date_labels = "%b-%y")  
+  
 
 
 months_last_gt<-
@@ -113,18 +101,12 @@ months_next_chart<-
 cbind(
 data.frame(date=seq(as.Date("2024-10-01"),by="month",len=12))
 ,
-rownames_to_column(as.data.frame(dwrfor)) %>% select(c(3,4))) %>% 
-pivot_longer(!date,names_to ="Prices" ,values_to = "values") %>%
-mutate(date=as.POSIXct(date)) %>% 
-ggplot(aes(x=date,y=values,fill=Prices))+
-geom_bar(stat = "identity",position = "stack")+
-geom_text(aes(label = paste0(round(values/1000,2),"K")),
-position = position_stack(vjust = 0.5),colour = "white",fontface = "bold")+
-theme_linedraw()+scale_fill_brewer(palette = "Dark2")+
-scale_x_datetime(date_breaks ="month" ,date_labels = "%b-%Y")+
-theme(axis.text.y = element_blank(),axis.ticks.y = element_blank())+
-  labs(x="") 
-
+rownames_to_column(as.data.frame(dwrfor)) %>% select(c(4))) %>% 
+mutate(date=as.POSIXct(date)) %>% clean_names() %>% 
+ggplot(aes(x=date,y=hi_80))+geom_line(size=1.3)+geom_point(size=3)+
+geom_label(aes(label=paste0(round(hi_80/1000,2),"K"),nudge_x =.25 ,nudge_y = .25))+
+labs(x="",y="",title = "Detect Next Year DowJones Prices Model",subtitle = "Data Focus Period: 1992 - Sep 2024")+scale_y_continuous(labels = comma)+theme_bw()+theme(axis.text.x = element_text(face = "bold",color="black"),axis.text.y = element_text(face = "bold",color="black"),legend.position = "top",plot.title = element_text(color = "#2c3e50",face = "bold"))+scale_x_datetime(date_breaks ="month" ,date_labels = "%b-%y")
+  
 
 
 
@@ -163,7 +145,7 @@ autoplot(decompose(diff(dwts)))
 
 
 ```{r echo=FALSE,message=FALSE,warning=FALSE}
-ggplotly( months_last_chart , width=900)
+months_last_chart
 ```
 
 
@@ -185,7 +167,7 @@ autoplot(decompose(diff(dwrts)))
 
 
 ```{r echo=FALSE,message=FALSE,warning=FALSE}
-ggplotly( months_next_chart,900)
+months_next_chart
 ```
 
 ### Forecast Table  
